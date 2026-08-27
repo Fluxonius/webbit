@@ -28,6 +28,7 @@ export function Toolbar({
 
   return (
     <div className="toolbar">
+      <div className="toolbar-group">
       {/* Adding a magnet is the app's one default action, so it is the only
           filled button on the bar. Everything else is outline. */}
       <button className="ds-btn ds-btn--filled ds-btn--neutral" onClick={onAddMagnet}>
@@ -49,7 +50,13 @@ export function Toolbar({
         Seed files
       </button>
 
-      <span className="toolbar-sep" aria-hidden="true" />
+      </div>
+
+      {/* Everything after this is an action ON the current selection, so it
+          sits apart from the add-actions and stays pinned to the right edge. */}
+      <span className="toolbar-spacer" aria-hidden="true" />
+
+      <div className="toolbar-group">
 
       <button
         className="ds-btn ds-btn--outline ds-btn--neutral"
@@ -75,6 +82,7 @@ export function Toolbar({
         <TrashIcon aria-hidden="true" />
         Remove
       </button>
+      </div>
 
       <input
         ref={torrentInput}

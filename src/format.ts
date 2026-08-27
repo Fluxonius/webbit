@@ -66,3 +66,19 @@ export function formatRatio(r: number): string {
   if (!Number.isFinite(r)) return '∞'
   return r.toFixed(2)
 }
+
+/**
+ * ISO 3166-1 alpha-2 -> the regional-indicator pair that renders as that flag.
+ *
+ * Not an icon: the design system's icon set has no 250-country flag range, and
+ * this is data about a peer rather than a piece of UI furniture. Platforms that
+ * don't draw flags (Windows) fall back to the two letters, which still answers
+ * the question. Always paired with the country name in a tooltip so the glyph
+ * is never the only carrier.
+ */
+export function countryFlag(code: string): string {
+  if (!/^[A-Za-z]{2}$/.test(code)) return ''
+  return String.fromCodePoint(
+    ...[...code.toUpperCase()].map((c) => 0x1f1e6 + c.charCodeAt(0) - 65),
+  )
+}

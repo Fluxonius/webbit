@@ -1,3 +1,5 @@
+import geoip from 'geoip-country'
+
 // Decode a BitTorrent peer-id into a human client name.
 // Covers the common Azureus-style ("-XXdddd-") and a few Shadow-style ids.
 
@@ -84,4 +86,19 @@ export function connectionKind(type: string | undefined): string {
   if (type.startsWith('tcp')) return 'TCP'
   if (type === 'webSeed') return 'Web Seed'
   return type
+}
+
+/**
+ * Country of a peer's IP, looked up against a local database — no request
+ * leaves this machine, which matters when the addresses in question are the
+ * user's torrent peers.
+ *
+ * Returns empty strings for a private, reserved or unknown address rather than
+ * guessing; the UI renders that as a neutral placeholder.
+ */
+export function lookupCountry(ip: string | undefined): { country: string; countryName: string } {
+  if (!ip) return { country: '', countryName: '' }
+  const hit = geoip.lookup(ip)
+  if (!hit?.country) return { country: '', countryName: '' }
+  return { country: hit.country, countryName: hit.name || hit.country }
 }

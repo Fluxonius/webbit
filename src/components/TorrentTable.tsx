@@ -29,7 +29,7 @@ interface Column {
 const COLUMNS: Column[] = [
   { key: 'name', label: 'Name' },
   { key: 'length', label: 'Size', num: true, width: 88 },
-  { key: 'progress', label: 'Progress', num: true, width: 152 },
+  { key: 'progress', label: 'Progress', width: 152 },
   { key: 'downloadSpeed', label: '↓ Speed', num: true, width: 104 },
   { key: 'uploadSpeed', label: '↑ Speed', num: true, width: 104 },
   { key: 'numPeers', label: 'Peers', num: true, width: 72 },

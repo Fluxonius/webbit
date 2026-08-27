@@ -11,7 +11,7 @@ import type { FileInfo, PeerInfo, TorrentSnapshot } from '../../shared/types.ts'
 import type { Toasts } from '../useToasts.ts'
 import { api, downloadURL } from '../api.ts'
 import { buildTree } from '../filetree.ts'
-import { formatBytes, formatSpeed } from '../format.ts'
+import { countryFlag, formatBytes, formatSpeed } from '../format.ts'
 import { FileTree } from './FileTree.tsx'
 import { Player } from './Player.tsx'
 
@@ -203,7 +203,19 @@ function PeersTab({ infoHash }: { infoHash: string }) {
       <tbody>
         {peers.map((p) => (
           <tr key={p.id}>
-            <td className="ds-num">{p.address}</td>
+            {/* Left-aligned like its header: an address is an identifier read
+                from the left, not a quantity compared on its last digit. */}
+            <td className="addr-cell">
+              <span
+                className="flag"
+                title={p.countryName || 'Unknown location'}
+                aria-label={p.countryName || 'Unknown location'}
+                role="img"
+              >
+                {countryFlag(p.country) || '··'}
+              </span>
+              <span className="mono">{p.address}</span>
+            </td>
             <td>{p.client}</td>
             <td>{p.flags}</td>
             <td className="ds-num">{Math.round(p.progress * 100)}%</td>

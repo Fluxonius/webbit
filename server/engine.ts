@@ -12,7 +12,7 @@ import type {
 } from '../shared/types.ts'
 import { DOWNLOAD_DIR } from './paths.ts'
 import { EXTRA_TRACKERS } from './trackers.ts'
-import { decodeClient, connectionKind } from './peers.ts'
+import { decodeClient, connectionKind, lookupCountry } from './peers.ts'
 import {
   cacheTorrentFile,
   deleteCachedTorrentFile,
@@ -491,6 +491,7 @@ export class WebbitEngine {
         uploadSpeed: Math.round(w.uploadSpeed()),
         progress: numPieces > 0 ? have / numPieces : 0,
         flags: connectionKind(w.type),
+        ...lookupCountry(w.remoteAddress),
       }
     })
   }

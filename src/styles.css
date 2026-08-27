@@ -73,14 +73,21 @@ table.torrents tbody tr {
   display: flex;
   align-items: center;
   gap: var(--ds-space-2);
-  flex-wrap: wrap;
+  /* Claims the bar's leftover width so the spacer below has something to
+     push against. */
+  flex: 1;
+  min-width: 0;
 }
-/* Separates the add-actions from the act-on-selection actions. */
-.toolbar-sep {
-  width: var(--ds-border-width);
-  align-self: stretch;
-  margin: var(--ds-space-1);
-  background: var(--ds-border);
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  flex: none;
+}
+/* Pins the selection actions to the right edge of the bar. */
+.toolbar-spacer {
+  flex: 1;
+  min-width: var(--ds-space-4);
 }
 
 /* ---- Main split ---- */
@@ -130,8 +137,12 @@ table.torrents {
   color: inherit;
   font: inherit;
 }
+/* Right-aligned headers put the caret on the LEFT of the label. Leaving it on
+   the right pushes the label one icon-width in from the column edge, so the
+   header no longer sits over the digits it labels. */
 .th-sort.num {
-  justify-content: flex-end;
+  flex-direction: row-reverse;
+  justify-content: flex-start;
 }
 .th-sort:hover {
   background: var(--ds-surface-hover);
@@ -458,6 +469,23 @@ table.torrents {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* ---- Peers table ---- */
+.addr-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+/* The flag is a glyph, not an icon: it needs a fixed slot so the addresses
+   after it still form a straight column when a peer's country is unknown. */
+.addr-cell > .flag {
+  width: var(--ds-size-20);
+  flex: none;
+  text-align: center;
+  font-size: var(--ds-font-size-sm);
+  line-height: 1;
+  color: var(--ds-text-subtle);
 }
 
 /* ---- Misc ---- */

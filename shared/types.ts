@@ -31,6 +31,10 @@ export interface PeerInfo {
   uploadSpeed: number
   progress: number // 0..1, how much of the torrent this peer has (if known)
   flags: string // e.g. "encrypted", "utp"
+  /** ISO 3166-1 alpha-2, or '' when the IP isn't in the database. */
+  country: string
+  /** Human-readable country name, or '' — pairs with `country` so the flag is never the only signal. */
+  countryName: string
 }
 
 export interface TorrentSnapshot {
