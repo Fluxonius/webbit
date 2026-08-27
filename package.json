@@ -1,0 +1,37 @@
+{
+  "name": "webbit",
+  "version": "1.0.0",
+  "description": "A local web-based torrent client built on WebTorrent",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c cyan,magenta \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "node --watch --disable-warning=ExperimentalWarning server/index.ts",
+    "dev:web": "vite",
+    "start": "node --disable-warning=ExperimentalWarning server/index.ts",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.server.json",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "parse-torrent": "^11.0.24",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "webtorrent": "^3.0.21",
+    "ws": "^8.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@types/ws": "^8.18.1",
+    "@vitejs/plugin-react": "^6.0.5",
+    "concurrently": "^10.0.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.0"
+  }
+}
