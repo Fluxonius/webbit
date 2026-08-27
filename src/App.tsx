@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { MagnetIcon } from '@phosphor-icons/react'
 import type { TorrentSnapshot } from '../shared/types.ts'
 import { api } from './api.ts'
 import { useTorrents } from './useTorrents.ts'
@@ -96,9 +97,16 @@ export function App() {
 
   return (
     <div className="app">
-      <div className="topbar">
-        <span className="brand">
-          <span className={`dot ${connected ? '' : 'off'}`} />
+      <header className="ds-appbar topbar">
+        <span className="ds-appbar-brand">
+          {/* Live connection to the engine. The tooltip carries the state in
+              words — the dot's colour is never the only signal. */}
+          <span
+            className={`brand-dot${connected ? '' : ' off'}`}
+            role="img"
+            aria-label={connected ? 'Connected to engine' : 'Disconnected from engine'}
+            title={connected ? 'Connected to engine' : 'Disconnected from engine'}
+          />
           webbit
         </span>
         <Toolbar
@@ -110,15 +118,19 @@ export function App() {
           onResume={() => selected && attempt(() => api.resume(selected.infoHash), 'Could not resume')}
           onRemove={() => selected && setRemoving(selected)}
         />
-      </div>
+      </header>
 
       <div className="main">
         <div className="table-wrap">
           {torrents.length === 0 ? (
-            <div className="empty">
-              <h2>No torrents yet</h2>
-              <div>
-                Add a <b>magnet link</b> or a <b>.torrent file</b>, or drop files here to seed.
+            <div className="empty-wrap">
+              <div className="ds-empty">
+                <MagnetIcon aria-hidden="true" />
+                <p className="ds-empty-title">No torrents yet</p>
+                <p className="ds-empty-body">
+                  Add a magnet link or a .torrent file, or drop files anywhere on this window
+                  to seed them.
+                </p>
               </div>
             </div>
           ) : (
@@ -197,19 +209,27 @@ function RemoveDialog({
       onClose={onClose}
       footer={
         <div className="right">
-          <button onClick={onClose}>Cancel</button>
-          <button className="danger primary" onClick={() => onConfirm(deleteData)}>
+          <button className="ds-btn ds-btn--outline ds-btn--neutral" onClick={onClose}>
+            Cancel
+          </button>
+          {/* The one place a filled destructive button is right: a confirmed,
+              explicitly labelled removal. */}
+          <button
+            className="ds-btn ds-btn--filled ds-btn--destructive"
+            onClick={() => onConfirm(deleteData)}
+          >
             Remove
           </button>
         </div>
       }
     >
       <div className="modal-body">
-        <p style={{ margin: '0 0 12px' }}>
+        <p style={{ marginTop: 0 }}>
           Remove <b>{torrent.name}</b> from the list?
         </p>
-        <label className="check">
+        <label className="ds-choice">
           <input
+            className="ds-check"
             type="checkbox"
             checked={deleteData}
             onChange={(e) => setDeleteData(e.target.checked)}

@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react'
+import { XIcon } from '@phosphor-icons/react'
 
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -88,19 +89,28 @@ export function Modal({
   }, [])
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="ds-backdrop modal-backdrop" onClick={onClose}>
       <div
         ref={dialogRef}
-        className={`modal${wide ? ' wide' : ''}`}
+        className={`ds-modal app-modal${wide ? ' ds-modal--wide' : ' ds-modal--form'}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-head">
-          <span id={titleId}>{title}</span>
-          <button className="icon-btn" onClick={onClose} aria-label="Close dialog">
-            <span aria-hidden="true">✕</span>
+          <span className="title" id={titleId}>
+            {title}
+          </span>
+          {/* Plain priority: a repeated, unlabelled affordance that must not
+              compete with the footer's real actions. */}
+          <button
+            className="ds-btn ds-iconbtn ds-btn--plain ds-btn--neutral"
+            onClick={onClose}
+            aria-label="Close dialog"
+            title="Close dialog"
+          >
+            <XIcon aria-hidden="true" />
           </button>
         </div>
         {children}

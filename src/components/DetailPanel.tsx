@@ -1,4 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
+import {
+  CheckIcon,
+  CopyIcon,
+  DownloadSimpleIcon,
+  PlayIcon,
+  WarningIcon,
+  XIcon,
+} from '@phosphor-icons/react'
 import type { FileInfo, PeerInfo, TorrentSnapshot } from '../../shared/types.ts'
 import type { Toasts } from '../useToasts.ts'
 import { api, downloadURL } from '../api.ts'
@@ -8,6 +16,8 @@ import { FileTree } from './FileTree.tsx'
 import { Player } from './Player.tsx'
 
 type Tab = 'files' | 'peers' | 'info'
+
+const TAB_LABEL: Record<Tab, string> = { files: 'Files', peers: 'Peers', info: 'Info' }
 
 export function DetailPanel({
   torrent,
@@ -24,22 +34,41 @@ export function DetailPanel({
     setPlaying(null)
   }, [torrent.infoHash])
 
+  const count: Record<Tab, number | null> = {
+    files: torrent.files.length,
+    peers: torrent.numPeers,
+    info: null,
+  }
+
   return (
     <>
-      <div className="tabs">
+      {/* Underline tabs: these are pages of content, not filters over the same
+          content, which is what a segmented control would mean. */}
+      <div className="ds-tabs detail-tabs" role="tablist" aria-label="Torrent details">
         {(['files', 'peers', 'info'] as Tab[]).map((t) => (
           <button
             key={t}
-            className={`tab ${tab === t ? 'active' : ''}`}
+            type="button"
+            role="tab"
+            id={`detail-tab-${t}`}
+            aria-selected={tab === t}
+            aria-controls="detail-tabpanel"
+            tabIndex={tab === t ? 0 : -1}
+            className="ds-tab"
             onClick={() => setTab(t)}
           >
-            {t === 'files' ? 'Files' : t === 'peers' ? 'Peers' : 'Info'}
-            {t === 'files' ? ` (${torrent.files.length})` : ''}
-            {t === 'peers' ? ` (${torrent.numPeers})` : ''}
+            {TAB_LABEL[t]}
+            {count[t] !== null ? ` (${count[t]})` : ''}
           </button>
         ))}
       </div>
-      <div className="tab-body">
+      <div
+        className="tab-body"
+        id="detail-tabpanel"
+        role="tabpanel"
+        aria-labelledby={`detail-tab-${tab}`}
+        tabIndex={0}
+      >
         {tab === 'files' && (
           <FilesTab torrent={torrent} playing={playing} onPlay={setPlaying} attempt={attempt} />
         )}
@@ -81,11 +110,15 @@ function FilesTab({
   return (
     <div>
       {live && (
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6, gap: 10 }}>
-            <b style={{ flex: 1 }}>{live.name}</b>
-            <button className="icon-btn" onClick={() => onPlay(null)}>
-              <span aria-hidden="true">✕</span> Close player
+        <div className="player-wrap">
+          <div className="player-head">
+            <span className="fname">{live.name}</span>
+            <button
+              className="ds-btn ds-btn--s ds-btn--outline ds-btn--neutral"
+              onClick={() => onPlay(null)}
+            >
+              <XIcon aria-hidden="true" />
+              Close player
             </button>
           </div>
           <Player infoHash={torrent.infoHash} file={live} />
@@ -97,27 +130,27 @@ function FilesTab({
         onToggle={toggle}
         showProgress
         renderActions={(f) => (
-          <span style={{ display: 'inline-flex', gap: 4 }}>
+          <span className="row-actions">
             {f.streamable && (
               <button
-                className="icon-btn"
+                className="ds-btn ds-iconbtn ds-btn--s ds-btn--plain ds-btn--neutral"
                 title="Stream / preview"
                 aria-label={`Stream ${f.name}`}
                 onClick={() => onPlay(f)}
               >
-                <span aria-hidden="true">▶</span>
+                <PlayIcon aria-hidden="true" />
               </button>
             )}
             {/* A styled <a>, not an <a> wrapping a <button>: nesting a button
                 inside a link is invalid HTML and left the control unnamed. */}
             <a
-              className="icon-btn"
+              className="ds-btn ds-iconbtn ds-btn--s ds-btn--plain ds-btn--neutral"
               href={downloadURL(torrent.infoHash, f.index)}
               download
               title="Download to my computer"
               aria-label={`Download ${f.name}`}
             >
-              <span aria-hidden="true">⬇</span>
+              <DownloadSimpleIcon aria-hidden="true" />
             </a>
           </span>
         )}
@@ -148,30 +181,34 @@ function PeersTab({ infoHash }: { infoHash: string }) {
   }, [infoHash])
 
   if (peers.length === 0) {
-    return <p className="hint">No connected peers right now.</p>
+    return (
+      <div className="ds-empty">
+        <p className="ds-empty-body">No connected peers right now.</p>
+      </div>
+    )
   }
 
   return (
-    <table className="data">
+    <table className="ds-table" aria-label="Connected peers">
       <thead>
         <tr>
           <th>Address</th>
           <th>Client</th>
           <th>Conn</th>
-          <th style={{ textAlign: 'right' }}>Progress</th>
-          <th style={{ textAlign: 'right' }}>↓</th>
-          <th style={{ textAlign: 'right' }}>↑</th>
+          <th className="ds-num">Progress</th>
+          <th className="ds-num">Down</th>
+          <th className="ds-num">Up</th>
         </tr>
       </thead>
       <tbody>
         {peers.map((p) => (
           <tr key={p.id}>
-            <td>{p.address}</td>
+            <td className="ds-num">{p.address}</td>
             <td>{p.client}</td>
             <td>{p.flags}</td>
-            <td style={{ textAlign: 'right' }}>{Math.round(p.progress * 100)}%</td>
-            <td style={{ textAlign: 'right' }}>{formatSpeed(p.downloadSpeed)}</td>
-            <td style={{ textAlign: 'right' }}>{formatSpeed(p.uploadSpeed)}</td>
+            <td className="ds-num">{Math.round(p.progress * 100)}%</td>
+            <td className="ds-num">{formatSpeed(p.downloadSpeed)}</td>
+            <td className="ds-num">{formatSpeed(p.uploadSpeed)}</td>
           </tr>
         ))}
       </tbody>
@@ -187,45 +224,56 @@ function InfoTab({ torrent }: { torrent: TorrentSnapshot }) {
   return (
     <div>
       {torrent.error && (
-        <div className="diag-note" style={{ borderLeftColor: 'var(--red)' }}>
-          <b>Error:</b> {torrent.error}
+        <div className="ds-alert ds-alert--danger" role="alert">
+          <WarningIcon aria-hidden="true" />
+          <div>
+            <span className="ds-alert-title">Error</span>
+            <p className="ds-alert-body">{torrent.error}</p>
+          </div>
         </div>
       )}
       {noPeersLong && !torrent.error && (
-        <div className="diag-note">
-          <b>No peers connected.</b> If this stays at 0, the torrent may be dead (no seeders),
-          or peer discovery is still warming up via DHT and trackers. Public torrents can take a
-          little while to find peers.
+        <div className="ds-alert ds-alert--warning">
+          <WarningIcon aria-hidden="true" />
+          <div>
+            <span className="ds-alert-title">No peers connected</span>
+            <p className="ds-alert-body">
+              If this stays at 0, the torrent may be dead (no seeders), or peer discovery is
+              still warming up via DHT and trackers. Public torrents can take a little while to
+              find peers.
+            </p>
+          </div>
         </div>
       )}
-      <dl className="kv">
+      <dl className="ds-dl">
         <dt>Name</dt>
         <dd>{torrent.name}</dd>
         <dt>Info hash</dt>
-        <dd>{torrent.infoHash}</dd>
+        <dd className="mono">{torrent.infoHash}</dd>
         <dt>Size (selected)</dt>
-        <dd>{formatBytes(torrent.length)}</dd>
+        <dd className="mono">{formatBytes(torrent.length)}</dd>
         <dt>Downloaded</dt>
-        <dd>{formatBytes(torrent.downloaded)}</dd>
+        <dd className="mono">{formatBytes(torrent.downloaded)}</dd>
         <dt>Uploaded</dt>
-        <dd>{formatBytes(torrent.uploaded)}</dd>
+        <dd className="mono">{formatBytes(torrent.uploaded)}</dd>
         <dt>Ratio</dt>
-        <dd>{torrent.ratio.toFixed(2)}</dd>
+        <dd className="mono">{torrent.ratio.toFixed(2)}</dd>
         <dt>Peers</dt>
-        <dd>{torrent.numPeers}</dd>
+        <dd className="mono">{torrent.numPeers}</dd>
         <dt>Added</dt>
         <dd>{new Date(torrent.addedAt).toLocaleString()}</dd>
         <dt>Magnet</dt>
         <dd>
           <button
-            className="icon-btn"
+            className="ds-btn ds-btn--s ds-btn--outline ds-btn--neutral"
             onClick={() => {
               void navigator.clipboard.writeText(torrent.magnetURI)
               setCopied(true)
               setTimeout(() => setCopied(false), 1500)
             }}
           >
-            {copied ? 'Copied ✓' : 'Copy magnet link'}
+            {copied ? <CheckIcon aria-hidden="true" /> : <CopyIcon aria-hidden="true" />}
+            {copied ? 'Copied' : 'Copy magnet link'}
           </button>
         </dd>
       </dl>

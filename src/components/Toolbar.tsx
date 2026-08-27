@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { MagnetIcon, PauseIcon, PlayIcon, PlantIcon, TrashIcon, UploadSimpleIcon } from '@phosphor-icons/react'
 import type { TorrentSnapshot } from '../../shared/types.ts'
 
 export function Toolbar({
@@ -27,22 +28,52 @@ export function Toolbar({
 
   return (
     <div className="toolbar">
-      <button className="primary" onClick={onAddMagnet}>
-        ＋ Magnet
+      {/* Adding a magnet is the app's one default action, so it is the only
+          filled button on the bar. Everything else is outline. */}
+      <button className="ds-btn ds-btn--filled ds-btn--neutral" onClick={onAddMagnet}>
+        <MagnetIcon aria-hidden="true" />
+        Magnet
       </button>
-      <button onClick={() => torrentInput.current?.click()}>⬆ .torrent</button>
-      <button onClick={() => seedInput.current?.click()}>🌱 Seed files</button>
+      <button
+        className="ds-btn ds-btn--outline ds-btn--neutral"
+        onClick={() => torrentInput.current?.click()}
+      >
+        <UploadSimpleIcon aria-hidden="true" />
+        .torrent
+      </button>
+      <button
+        className="ds-btn ds-btn--outline ds-btn--neutral"
+        onClick={() => seedInput.current?.click()}
+      >
+        <PlantIcon aria-hidden="true" />
+        Seed files
+      </button>
 
-      <span style={{ width: 8 }} />
+      <span className="toolbar-sep" aria-hidden="true" />
 
-      <button disabled={!canResume} onClick={onResume}>
-        ▶ Resume
+      <button
+        className="ds-btn ds-btn--outline ds-btn--neutral"
+        disabled={!canResume}
+        onClick={onResume}
+      >
+        <PlayIcon aria-hidden="true" />
+        Resume
       </button>
-      <button disabled={!canPause} onClick={onPause}>
-        ⏸ Pause
+      <button
+        className="ds-btn ds-btn--outline ds-btn--neutral"
+        disabled={!canPause}
+        onClick={onPause}
+      >
+        <PauseIcon aria-hidden="true" />
+        Pause
       </button>
-      <button className="danger" disabled={!selected} onClick={onRemove}>
-        🗑 Remove
+      <button
+        className="ds-btn ds-btn--outline ds-btn--destructive"
+        disabled={!selected}
+        onClick={onRemove}
+      >
+        <TrashIcon aria-hidden="true" />
+        Remove
       </button>
 
       <input

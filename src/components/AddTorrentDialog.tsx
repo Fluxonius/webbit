@@ -35,18 +35,27 @@ export function AddTorrentDialog({
       onClose={onClose}
       footer={
         <div className="right">
-          <button onClick={onClose}>Cancel</button>
-          <button className="primary" disabled={!valid || busy} onClick={submit}>
+          <button className="ds-btn ds-btn--outline ds-btn--neutral" onClick={onClose}>
+            Cancel
+          </button>
+          {/* Ink, not accent: the confirming action of a dialog is the system's
+              default action, and accent is reserved for meaning. */}
+          <button
+            className="ds-btn ds-btn--filled ds-btn--neutral"
+            disabled={!valid || busy}
+            onClick={submit}
+          >
             {busy ? 'Adding…' : 'Add torrent'}
           </button>
         </div>
       }
     >
       <div className="modal-body">
-        <label className="field-label" htmlFor={inputId}>
+        <label className="ds-label" htmlFor={inputId}>
           Magnet link
         </label>
         <input
+          className="ds-input"
           id={inputId}
           type="text"
           placeholder="magnet:?xt=urn:btih:…"
@@ -58,11 +67,11 @@ export function AddTorrentDialog({
             if (e.key === 'Enter') submit()
           }}
         />
-        <p className="hint">
+        <p className="ds-help">
           Paste a magnet link. After the metadata loads you'll choose which files to download.
         </p>
         {error && (
-          <p id={errorId} role="alert" className="hint" style={{ color: 'var(--red)' }}>
+          <p id={errorId} role="alert" className="ds-help ds-help--error">
             {error}
           </p>
         )}

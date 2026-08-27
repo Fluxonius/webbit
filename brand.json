@@ -1,0 +1,11 @@
+{
+  "name": "webbit",
+  "primary": "#2F8F5B",
+  "radius": "soft",
+  "density": "default",
+  "iconSet": "phosphor",
+  "fontPreset": "technical",
+  "fonts": {},
+  "borderWeight": "hairline",
+  "prefix": "ds"
+}

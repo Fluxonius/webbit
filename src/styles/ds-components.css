@@ -1,0 +1,1604 @@
+/* ds-components.css -- the component layer of the design system.
+ *
+ * Load AFTER tokens.css and AFTER any existing project CSS:
+ *     <link rel="stylesheet" href="tokens.css">
+ *     <link rel="stylesheet" href="legacy.css">
+ *     <link rel="stylesheet" href="ds-components.css">
+ *
+ * Every value here is a token reference, so this file is brand-agnostic --
+ * swapping tokens.css changes the brand without touching this stylesheet.
+ *
+ * GENERATED FILE. Edit brand.json and re-run build_components_css.py.
+ */
+
+/* ---------------------------------------------------------------- reset ---
+ * Scoped to system classes only, so it cannot damage un-migrated markup.
+ */
+[class*="ds-"] { box-sizing: border-box; }
+
+/* Icons are ALWAYS sized.
+ *
+ * An inline `<svg>` carrying only a viewBox has no intrinsic size, so it falls
+ * back to the replaced-element default of 300x150 -- an icon rendering at 300px
+ * wide. Sizing icons per component covered the eleven that had a rule and left
+ * menu items, combobox options, tree rows and empty states enormous.
+ *
+ * `:where()` contributes zero specificity and this rule comes first, so any
+ * component that needs a different size (iconbtn at icon-md, dropzone at
+ * icon-lg) still wins. `:not([class])` leaves classed SVGs alone -- the spinner
+ * and the sparkline size themselves.
+ */
+:where([class*="ds-"]) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ds-control-active) transparent;
+}
+:where([class*="ds-"]) svg:not([class]) {
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
+  flex: none;
+}
+
+/* Focus is a system-wide law, never restyled per component.
+ * No border-radius here: `outline` already follows the element's own corners.
+ * `border-radius: inherit` would make a focused element adopt its PARENT's
+ * radius and square off its own. */
+[class*="ds-"]:focus-visible {
+  outline: var(--ds-focus-ring-width) solid var(--ds-focus-ring);
+  outline-offset: var(--ds-focus-ring-offset);
+}
+
+/* Universal disabled treatment: opacity, never a lighter colour token, so one
+ * rule covers every component. */
+.ds-btn[disabled], .ds-btn[aria-disabled="true"],
+.ds-input[disabled], .ds-select[disabled],
+.ds-chip[aria-disabled="true"] {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------------------- button ---
+ * Two sizes (M default, S). Three priorities x three colours. Nothing else.
+ * Hover changes BACKGROUND ONLY -- never border, text, size or position.
+ */
+.ds-btn {
+  height: var(--ds-control-h-md);
+  padding: 0 var(--ds-control-px-md);
+  border-radius: var(--ds-radius-md);
+  font: 500 var(--ds-font-size-sm)/1 var(--ds-font-text);
+  border: var(--ds-border-width) solid transparent;
+  background: transparent;
+  color: var(--ds-text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--ds-space-2);
+  min-width: var(--ds-size-64);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--ds-duration-fast) var(--ds-ease-standard);
+}
+.ds-btn--s {
+  height: var(--ds-control-h-sm);
+  padding: 0 var(--ds-control-px-sm);
+  gap: var(--ds-space-1);
+  min-width: var(--ds-size-56);
+}
+.ds-btn > svg { width: var(--ds-icon-sm); height: var(--ds-icon-sm); flex: none; }
+
+/* filled -- the committed state. Neutral is INK, not accent: the brand hue is
+ * reserved for links, selection, focus and status. */
+.ds-btn--filled.ds-btn--neutral { background: var(--ds-ink); color: var(--ds-on-ink); }
+.ds-btn--filled.ds-btn--neutral:hover:not([disabled]) { background: var(--ds-ink-hover); }
+.ds-btn--filled.ds-btn--neutral:active:not([disabled]) { background: var(--ds-ink-active); }
+.ds-btn--filled.ds-btn--primary { background: var(--ds-accent); color: var(--ds-on-accent); }
+.ds-btn--filled.ds-btn--primary:hover:not([disabled]) { background: var(--ds-accent-hover); }
+.ds-btn--filled.ds-btn--destructive { background: var(--ds-danger-solid); color: var(--ds-on-danger); }
+.ds-btn--filled.ds-btn--destructive:hover:not([disabled]) { background: var(--ds-danger-text); }
+
+/* outline -- transparent, so the EDGE is the only thing identifying it as a
+ * control. That means it carries the full 3:1 boundary requirement and uses
+ * border-strong, not control-border (~1.3:1 in light mode). */
+.ds-btn--outline.ds-btn--neutral { border-color: var(--ds-border-strong); color: var(--ds-text); }
+.ds-btn--outline.ds-btn--neutral:hover:not([disabled]) { background: var(--ds-control-subtle); }
+.ds-btn--outline.ds-btn--primary { border-color: var(--ds-accent-border); color: var(--ds-accent-text); }
+.ds-btn--outline.ds-btn--primary:hover:not([disabled]) { background: var(--ds-accent-subtle); }
+.ds-btn--outline.ds-btn--destructive { border-color: var(--ds-danger-border); color: var(--ds-danger-text); }
+.ds-btn--outline.ds-btn--destructive:hover:not([disabled]) { background: var(--ds-danger-subtle); }
+
+/* ghost -- tinted at rest, never fully transparent. Rest and hover are one step
+ * apart on the same ramp so the tint deepens rather than appearing. */
+.ds-btn--ghost.ds-btn--neutral { background: var(--ds-control-subtle); color: var(--ds-text); }
+.ds-btn--ghost.ds-btn--neutral:hover:not([disabled]) { background: var(--ds-control); }
+.ds-btn--ghost.ds-btn--primary { background: var(--ds-accent-subtle); color: var(--ds-accent-text); }
+.ds-btn--ghost.ds-btn--primary:hover:not([disabled]) { background: var(--ds-accent-muted); }
+.ds-btn--ghost.ds-btn--destructive { background: var(--ds-danger-subtle); color: var(--ds-danger-text); }
+.ds-btn--ghost.ds-btn--destructive:hover:not([disabled]) { background: var(--ds-danger-muted); }
+
+/* Square but LABELLED -- a pagination number, a calendar day. Not an Icon
+ * Button: it has visible text, so it needs no aria-label, and it is a legal
+ * home for `plain` because it is a compact control inside a group. */
+.ds-btn--square {
+  width: var(--ds-control-h-md);
+  min-width: 0;
+  padding: 0;
+  gap: 0;
+}
+.ds-btn--square.ds-btn--s { width: var(--ds-control-h-sm); }
+
+/* ---------------------------------------------------------- icon button ---
+ * Square. Adds a fourth priority, `plain` -- no background at all -- for
+ * repeated controls (table rows, toolbars) where a tint per instance stacks
+ * into visual noise. aria-label and a tooltip are mandatory.
+ */
+.ds-iconbtn {
+  width: var(--ds-control-h-md);
+  height: var(--ds-control-h-md);
+  min-width: 0;
+  padding: 0;
+  gap: 0;
+}
+.ds-iconbtn > svg { width: var(--ds-icon-md); height: var(--ds-icon-md); }
+.ds-iconbtn.ds-btn--s { width: var(--ds-control-h-sm); height: var(--ds-control-h-sm); }
+.ds-iconbtn.ds-btn--s > svg { width: var(--ds-icon-sm); height: var(--ds-icon-sm); }
+.ds-btn--plain.ds-btn--neutral { background: transparent; color: var(--ds-text); }
+.ds-btn--plain.ds-btn--neutral:hover:not([disabled]) { background: var(--ds-control-subtle); }
+.ds-btn--plain.ds-btn--primary { background: transparent; color: var(--ds-accent-text); }
+.ds-btn--plain.ds-btn--primary:hover:not([disabled]) { background: var(--ds-accent-subtle); }
+.ds-btn--plain.ds-btn--destructive { background: transparent; color: var(--ds-danger-text); }
+.ds-btn--plain.ds-btn--destructive:hover:not([disabled]) { background: var(--ds-danger-subtle); }
+
+/* ----------------------------------------------------------------- link --- */
+.ds-link { color: var(--ds-accent-text); text-decoration: none; }
+.ds-link:hover { text-decoration: underline; }
+
+/* ---------------------------------------------------------------- field ---
+ * Borderless and recessed: `control` fill, no edge at rest. Invalid is the one
+ * exception -- an error must be locatable without reading.
+ */
+.ds-field { display: block; }
+.ds-label {
+  display: block;
+  font-size: var(--ds-font-size-sm);
+  font-weight: 500;
+  color: var(--ds-text);
+  margin-bottom: var(--ds-space-1);
+}
+.ds-label-optional { color: var(--ds-text-subtle); font-weight: 400; }
+.ds-input, .ds-select, .ds-textarea {
+  width: 100%;
+  height: var(--ds-control-h-md);
+  padding: 0 var(--ds-control-px-sm);
+  border: var(--ds-border-width) solid transparent;
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-control);
+  color: var(--ds-text);
+  font: 400 var(--ds-font-size-base)/1 var(--ds-font-text);
+  transition: background var(--ds-duration-fast) var(--ds-ease-standard);
+}
+/* The native select arrow is drawn by the browser at a position we do not
+ * control -- it sat hard against the right edge regardless of padding. So the
+ * arrow is suppressed and the system draws its own, inset by the field's own
+ * horizontal padding like every other trailing affordance. The glyph is a mask
+ * so it takes its colour from a token and follows the theme. */
+.ds-select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: calc(var(--ds-control-px-sm) * 2 + var(--ds-icon-sm));
+}
+.ds-select-wrap { position: relative; display: block; }
+.ds-select-wrap::after {
+  content: "";
+  position: absolute;
+  right: var(--ds-control-px-sm);
+  top: 50%;
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
+  margin-top: calc(var(--ds-icon-sm) / -2);
+  pointer-events: none;
+  background-color: var(--ds-text-muted);
+  -webkit-mask: var(--ds-chevron-glyph) center / var(--ds-icon-sm) no-repeat;
+  mask: var(--ds-chevron-glyph) center / var(--ds-icon-sm) no-repeat;
+}
+
+.ds-textarea {
+  height: auto;
+  min-height: var(--ds-size-80);
+  padding: var(--ds-space-3);
+  line-height: var(--ds-line-height-base);
+  resize: vertical;
+}
+.ds-input:hover:not([disabled]), .ds-select:hover:not([disabled]) {
+  background: var(--ds-control-hover);
+}
+.ds-input::placeholder, .ds-textarea::placeholder { color: var(--ds-text-subtle); }
+.ds-input[aria-invalid="true"], .ds-select[aria-invalid="true"],
+.ds-textarea[aria-invalid="true"] { border-color: var(--ds-danger-border); }
+.ds-input[readonly] { background: var(--ds-surface); }
+/* Helper line is always reserved, so an error does not shift the form down. */
+.ds-help {
+  display: block;
+  min-height: var(--ds-size-16);
+  margin-top: var(--ds-space-1);
+  font-size: var(--ds-font-size-2xs);
+  color: var(--ds-text-muted);
+}
+.ds-help--error { color: var(--ds-danger-text); }
+
+/* ------------------------------------------------------- choice controls ---
+ * Checked fill is INK, matching the primary button: both are "the committed
+ * state". The selected ROW behind a checkbox is still accent-subtle.
+ */
+.ds-check, .ds-radio {
+  appearance: none;
+  /* `position: relative` + an absolutely positioned glyph keeps the mark OUT
+   * of layout. As `inline-grid` with a centred child, the box's baseline
+   * changed the moment `::after` appeared, so the whole control dropped a
+   * pixel or two when checked -- visible in any inline context, e.g. a table
+   * cell. `vertical-align: middle` removes the baseline dependency entirely. */
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  width: var(--ds-size-20); height: var(--ds-size-20);
+  flex: none;
+  margin: 0;
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  background: var(--ds-surface);
+  cursor: pointer;
+}
+.ds-check { border-radius: var(--ds-radius-sm); }
+.ds-radio { border-radius: var(--ds-radius-full); }
+.ds-check:checked, .ds-radio:checked {
+  background: var(--ds-ink);
+  border-color: var(--ds-ink);
+}
+/* The mark is a MASK, not two rotated borders.
+ *
+ * The border trick needs `transform: rotate() translate()`, and because
+ * transform functions compose left-to-right the translate runs in the rotated
+ * frame -- it nudges the glyph diagonally, not vertically, which is why the
+ * tick sat off-centre. Fixing it with a hand-tuned offset only works at one
+ * size and one stroke weight.
+ *
+ * The mask path is centred BY CONSTRUCTION: vertices (4,12.5) (9,17.5)
+ * (20,6.5) give a bounding box of x 4..20 and y 6.5..17.5, both centred on 12
+ * in a 24 viewBox, and a symmetric round stroke extends it evenly. So `center`
+ * is genuinely centre at any size, and the colour comes from the mask's own
+ * background so it still follows the token. */
+.ds-check:checked::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--ds-on-ink);
+  -webkit-mask: var(--ds-check-glyph) center / var(--ds-size-12) no-repeat;
+  mask: var(--ds-check-glyph) center / var(--ds-size-12) no-repeat;
+}
+/* Indeterminate is a centred bar, same mechanism. */
+.ds-check:indeterminate {
+  background: var(--ds-ink);
+  border-color: var(--ds-ink);
+}
+.ds-check:indeterminate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: var(--ds-on-ink);
+  -webkit-mask: var(--ds-indeterminate-glyph) center / var(--ds-size-12) no-repeat;
+  mask: var(--ds-indeterminate-glyph) center / var(--ds-size-12) no-repeat;
+}
+.ds-radio:checked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--ds-size-8);
+  height: var(--ds-size-8);
+  transform: translate(-50%, -50%);
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-on-ink);
+}
+/* Hit area is the whole label row, never just the box. */
+.ds-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  min-height: var(--ds-control-h-sm);
+  font-size: var(--ds-font-size-sm);
+  cursor: pointer;
+}
+.ds-switch {
+  appearance: none;
+  position: relative;
+  width: var(--ds-size-36); height: var(--ds-size-20);
+  flex: none;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-control-active);
+  cursor: pointer;
+  transition: background var(--ds-duration-fast) var(--ds-ease-standard);
+}
+.ds-switch::after {
+  content: "";
+  position: absolute; top: var(--ds-size-2); left: var(--ds-size-2);
+  width: var(--ds-size-16); height: var(--ds-size-16);
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-surface);
+  transition: transform var(--ds-duration-fast) var(--ds-ease-standard);
+}
+.ds-switch:checked { background: var(--ds-ink); }
+.ds-switch:checked::after { transform: translateX(var(--ds-size-16)); }
+
+/* ----------------------------------------------------------------- card ---
+ * Border, never a shadow. Shadows on cards are the single most reliable
+ * generated-UI tell.
+ */
+.ds-card {
+  background: var(--ds-surface);
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  padding: var(--ds-space-4);
+  box-shadow: none;
+}
+.ds-card--interactive { cursor: pointer; transition: background var(--ds-duration-fast) var(--ds-ease-standard); }
+.ds-card--interactive:hover { background: var(--ds-surface-hover); }
+.ds-card-title {
+  margin: 0;
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-font-size-lg);
+  font-weight: 600;
+}
+.ds-card-subtitle {
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-text-muted);
+  margin: var(--ds-space-1) 0 0;
+}
+
+/* ---------------------------------------------------- badge / tag / chip ---
+ * Badge is a LABEL: fill only, no edge -- its container frames it.
+ * Chip is a CONTROL: fill plus edge -- it floats free on the page.
+ * Both are pills at every corner preset.
+ */
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  height: var(--ds-size-20);
+  padding: 0 var(--ds-space-2);
+  border-radius: var(--ds-radius-full);
+  border: none;
+  background: var(--ds-control);
+  color: var(--ds-text-muted);
+  font-size: var(--ds-font-size-2xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.ds-badge--success { background: var(--ds-success-subtle); color: var(--ds-success-text); }
+.ds-badge--warning { background: var(--ds-warning-subtle); color: var(--ds-warning-text); }
+.ds-badge--danger  { background: var(--ds-danger-subtle);  color: var(--ds-danger-text); }
+.ds-badge--info    { background: var(--ds-info-subtle);    color: var(--ds-info-text); }
+
+.ds-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  height: var(--ds-control-h-sm);
+  padding: 0 var(--ds-space-3);
+  border-radius: var(--ds-radius-full);
+  border: var(--ds-border-width) solid var(--ds-control-border);
+  background: var(--ds-control);
+  color: var(--ds-text);
+  font-size: var(--ds-font-size-sm);
+  line-height: 1;
+  white-space: nowrap;
+  flex: none;
+  cursor: pointer;
+}
+.ds-chip:hover { background: var(--ds-control-hover); }
+.ds-chip[aria-pressed="true"], .ds-chip--selected {
+  background: var(--ds-accent-subtle);
+  border-color: var(--ds-accent-border);
+  color: var(--ds-accent-text);
+  font-weight: 500;
+}
+
+/* ---------------------------------------------------------------- alert ---
+ * Fill only, no border. Colour is always paired with an icon and a status word.
+ * Body text stays `text` -- tinting the paragraph shouts and hurts reading.
+ */
+.ds-alert {
+  display: flex;
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  border: none;
+  background: var(--ds-info-subtle);
+}
+.ds-alert > svg { width: var(--ds-icon-sm); height: var(--ds-icon-sm); flex: none; }
+.ds-alert-title { display: block; font-size: var(--ds-font-size-sm); font-weight: 600; }
+.ds-alert-body { margin: var(--ds-space-1) 0 0; font-size: var(--ds-font-size-sm); color: var(--ds-text); }
+.ds-alert--success { background: var(--ds-success-subtle); }
+.ds-alert--success .ds-alert-title, .ds-alert--success > svg { color: var(--ds-success-text); }
+.ds-alert--warning { background: var(--ds-warning-subtle); }
+.ds-alert--warning .ds-alert-title, .ds-alert--warning > svg { color: var(--ds-warning-text); }
+.ds-alert--danger { background: var(--ds-danger-subtle); }
+.ds-alert--danger .ds-alert-title, .ds-alert--danger > svg { color: var(--ds-danger-text); }
+.ds-alert--info .ds-alert-title, .ds-alert--info > svg { color: var(--ds-info-text); }
+
+/* ---------------------------------------------------------------- table ---
+ * Flush and borderless. Rules do the work, full-bleed rather than inset,
+ * because a table is a grid and an inset rule breaks column alignment.
+ */
+.ds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--ds-font-size-sm);
+}
+.ds-table th {
+  height: var(--ds-control-h-sm);
+  padding: 0 var(--ds-space-3);
+  text-align: left;
+  background: transparent;
+  font-size: var(--ds-font-size-2xs);
+  font-weight: 500;
+  color: var(--ds-text-muted);
+  border-bottom: var(--ds-border-width) solid var(--ds-border);
+}
+.ds-table td {
+  height: var(--ds-row-h);
+  padding: 0 var(--ds-space-3);
+  border-bottom: var(--ds-border-width) solid var(--ds-border-subtle);
+}
+.ds-table tbody tr:last-child td { border-bottom: none; }
+.ds-table tbody tr:hover { background: var(--ds-surface-hover); }
+.ds-table tr[aria-selected="true"] { background: var(--ds-accent-subtle); }
+/* Numeric columns.
+ *
+ * Alignment belongs to the whole column; tabular mono belongs only to the
+ * DIGITS. A header cell contains a word, so mono does nothing for it except
+ * break font consistency with every other header in the table. Scoping the
+ * font to `td` is the fix -- `.ds-num` on a `th` gives alignment alone.
+ */
+.ds-num { text-align: right; }
+td.ds-num, .ds-table td.ds-num {
+  font-family: var(--ds-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------- tabs / segmented ------
+ * Underline for VIEWS (pages of content). Segmented for FILTERS (lenses on the
+ * same content). The choice is semantic, not decorative.
+ */
+.ds-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: var(--ds-border-width) solid var(--ds-border);
+}
+.ds-tab {
+  height: var(--ds-control-h-md);
+  padding: 0 var(--ds-control-px-md);
+  border: none;
+  background: none;
+  font-size: var(--ds-font-size-sm);
+  font-weight: 500;
+  color: var(--ds-text-muted);
+  cursor: pointer;
+  position: relative;
+}
+.ds-tab[aria-selected="true"] { color: var(--ds-text); }
+.ds-tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: calc(var(--ds-border-width) * -1);
+  height: var(--ds-size-2);
+  background: var(--ds-accent);
+}
+.ds-segmented {
+  display: inline-flex;
+  gap: var(--ds-size-2);
+  padding: var(--ds-space-1);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-control);
+}
+.ds-segmented > button {
+  height: var(--ds-control-h-sm);
+  padding: 0 var(--ds-control-px-sm);
+  border: none;
+  border-radius: var(--ds-radius-sm);
+  background: transparent;
+  font-size: var(--ds-font-size-sm);
+  font-weight: 500;
+  color: var(--ds-text-muted);
+  cursor: pointer;
+}
+.ds-segmented > button[aria-selected="true"] {
+  background: var(--ds-surface);
+  color: var(--ds-text);
+}
+
+/* ------------------------------------------------------ menu / overlays ---
+ * Content inside a raised overlay hovers with `control-subtle`, NOT
+ * `surface-hover` -- the latter equals surface-raised in dark mode, so the
+ * hover would be invisible.
+ */
+.ds-menu {
+  min-width: var(--ds-container-menu-min);
+  max-width: var(--ds-container-menu-max);
+  padding: var(--ds-space-1);
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-raised);
+  box-shadow: var(--ds-shadow-sm);
+}
+.ds-menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: var(--ds-control-h-sm);
+  padding: 0 var(--ds-control-px-sm);
+  border-radius: var(--ds-radius-sm);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-text);
+  cursor: pointer;
+}
+.ds-menu-item:hover { background: var(--ds-control-subtle); }
+.ds-menu-item[aria-checked="true"] {
+  background: var(--ds-accent-subtle);
+  color: var(--ds-accent-text);
+}
+.ds-menu-item--danger { color: var(--ds-danger-text); }
+.ds-menu-sep {
+  height: var(--ds-border-width);
+  margin: var(--ds-space-1);
+  background: var(--ds-border-subtle);
+  border: none;
+}
+
+.ds-popover {
+  min-width: var(--ds-container-popover-min);
+  max-width: var(--ds-container-popover-max);
+  padding: var(--ds-space-4);
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-raised);
+  box-shadow: var(--ds-shadow-sm);
+}
+
+/* Tooltip computes its own foreground: `text-inverse` inverts the wrong way in
+ * dark mode and the label lands near-black on near-black. */
+.ds-tooltip {
+  max-width: var(--ds-container-tooltip-max);
+  padding: var(--ds-space-1) var(--ds-space-2);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-tooltip-bg);
+  color: var(--ds-tooltip-text);
+  font-size: var(--ds-font-size-2xs);
+  box-shadow: var(--ds-shadow-sm);
+}
+
+.ds-modal {
+  max-width: var(--ds-container-modal-sm);
+  padding: var(--ds-space-6);
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-surface-raised);
+  box-shadow: var(--ds-shadow-md);
+}
+.ds-modal--form { max-width: var(--ds-container-modal-md); }
+.ds-modal--wide { max-width: var(--ds-container-modal-lg); }
+/* No blur: the backdrop is a flat scrim. */
+.ds-backdrop { background: var(--ds-overlay); backdrop-filter: none; }
+
+.ds-toast {
+  min-width: var(--ds-container-toast-min);
+  max-width: var(--ds-container-toast-max);
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-raised);
+  border: var(--ds-border-width) solid var(--ds-border);
+  box-shadow: var(--ds-shadow-md);
+  font-size: var(--ds-font-size-sm);
+}
+
+/* -------------------------------------------------------------- avatar ---
+ * Circles for people, radius-sm squares for organisations. Fallbacks are
+ * neutral -- never a colour hashed from the name.
+ */
+.ds-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-size-32); height: var(--ds-size-32);
+  flex: none;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-control);
+  color: var(--ds-text-muted);
+  font-size: var(--ds-font-size-2xs);
+  font-weight: 500;
+  overflow: hidden;
+}
+.ds-avatar > img { width: 100%; height: 100%; object-fit: cover; }
+.ds-avatar--org { border-radius: var(--ds-radius-sm); }
+.ds-avatar--xs { width: var(--ds-size-20); height: var(--ds-size-20); }
+.ds-avatar--sm { width: var(--ds-size-24); height: var(--ds-size-24); }
+.ds-avatar--lg { width: var(--ds-size-40); height: var(--ds-size-40); }
+
+/* ------------------------------------------------------------ accordion ---
+ * Header is a fixed-height flex row with NO margin: an inherited margin-bottom
+ * opens dead space under every row in the list.
+ */
+.ds-accordion {
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface);
+  overflow: hidden;
+}
+.ds-accordion-item + .ds-accordion-item {
+  border-top: var(--ds-border-width) solid var(--ds-border-subtle);
+}
+.ds-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  width: 100%;
+  height: var(--ds-control-h-md);
+  margin: 0;
+  padding: 0 var(--ds-space-4);
+  border: none;
+  background: none;
+  font-size: var(--ds-font-size-sm);
+  font-weight: 500;
+  color: var(--ds-text);
+  text-align: left;
+  cursor: pointer;
+}
+.ds-accordion-header:hover { background: var(--ds-control-subtle); }
+.ds-accordion-header > svg {
+  width: var(--ds-icon-sm); height: var(--ds-icon-sm);
+  flex: none;
+  color: var(--ds-text-subtle);
+  transition: transform var(--ds-duration-fast) var(--ds-ease-standard);
+}
+.ds-accordion-header[aria-expanded="true"] > svg { transform: rotate(90deg); }
+.ds-accordion-panel {
+  /* The spec assumed the header's bottom padding supplied this gap, but the
+   * header is a fixed-height flex row and has none -- so the panel opened
+   * flush against the label. */
+  padding: var(--ds-space-2) var(--ds-space-4) var(--ds-space-4);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-text-muted);
+}
+
+/* ------------------------------------------------- progress / skeleton ---
+ * `width` is the one property in the system allowed to animate, because a
+ * progress bar IS a width.
+ */
+.ds-progress {
+  height: var(--ds-size-4);
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-control);
+  overflow: hidden;
+}
+.ds-progress > * {
+  display: block;
+  height: 100%;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-ink);
+  transition: width var(--ds-duration-base) var(--ds-ease-standard);
+}
+.ds-skeleton {
+  background: var(--ds-control);
+  border-radius: var(--ds-radius-sm);
+  height: var(--ds-line-height-sm);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ds-skeleton { animation: none; }
+  [class*="ds-"] { transition-duration: var(--ds-duration-reduced) !important; }
+}
+
+/* -------------------------------------------------------------- layout ---
+ * A divider is the weakest separator in the system. border-subtle, never
+ * border -- a divider that draws attention has failed at its job.
+ */
+.ds-divider {
+  height: var(--ds-border-width);
+  margin: var(--ds-space-4) 0;
+  background: var(--ds-border-subtle);
+  border: none;
+}
+.ds-stack { display: flex; flex-direction: column; gap: var(--ds-space-4); }
+.ds-row { display: flex; align-items: center; gap: var(--ds-space-2); }
+.ds-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--ds-size-120);
+  text-align: center;
+}
+.ds-empty > svg {
+  width: var(--ds-icon-lg);
+  height: var(--ds-icon-lg);
+  color: var(--ds-text-subtle);
+}
+.ds-empty-title { font-size: var(--ds-font-size-lg); font-weight: 600; margin: var(--ds-space-4) 0 0; }
+.ds-empty-body {
+  max-width: var(--ds-measure-narrow);
+  margin: var(--ds-space-1) 0 var(--ds-space-4);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-text-muted);
+}
+
+
+/* ================================================================ */
+/* NAVIGATION                                                        */
+/* ================================================================ */
+
+/* ---------------------------------------------------------- app bar ---
+ * Shares the page fill, separated by a border alone. Never raised, never a
+ * shadow, and the border does not animate in on scroll -- one that is present
+ * at rest has nothing to announce.
+ */
+.ds-appbar {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: var(--ds-size-56);
+  padding: 0 var(--ds-space-4);
+  background: var(--ds-bg);
+  border-bottom: var(--ds-border-width) solid var(--ds-border);
+  box-shadow: none;
+  position: sticky;
+  top: 0;
+  z-index: var(--ds-z-sticky);
+}
+.ds-appbar-brand {
+  display: flex;
+  align-items: center;
+  max-height: var(--ds-size-24);
+  font-size: var(--ds-font-size-sm);
+  font-weight: 600;
+  letter-spacing: var(--ds-letter-spacing-sm);
+}
+.ds-appbar-spacer { flex: 1; }
+.ds-appbar-search { max-width: var(--ds-container-search-wide); flex: 1; }
+
+/* ---------------------------------------------------------- sidebar ---
+ * Items sit 2px apart, not 8: a nav list is one object, and generous gaps make
+ * it read as a stack of separate buttons. Nested items indent by exactly one
+ * icon column so labels align with their parent's LABEL, not its icon.
+ */
+.ds-sidebar {
+  width: var(--ds-container-sidebar);
+  padding: var(--ds-space-2);
+  background: var(--ds-bg);
+  border-right: var(--ds-border-width) solid var(--ds-border);
+  box-shadow: none;
+  flex: none;
+}
+.ds-sidebar--collapsed { width: var(--ds-container-sidebar-collapsed); }
+.ds-navlist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-size-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.ds-navitem {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: var(--ds-control-h-sm);
+  padding: 0 var(--ds-control-px-sm);
+  border-radius: var(--ds-radius-sm);
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-text-muted);
+  text-decoration: none;
+  cursor: pointer;
+}
+.ds-navitem > svg {
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
+  flex: none;
+}
+.ds-navitem:hover { background: var(--ds-control-subtle); }
+/* Active is the system's selection language -- identical to a selected table
+   row and a checked menu item. Never a left accent bar, never a filled pill. */
+.ds-navitem[aria-current] {
+  background: var(--ds-accent-subtle);
+  color: var(--ds-accent-text);
+  font-weight: 500;
+}
+.ds-navitem--nested { padding-left: calc(var(--ds-control-px-sm) + var(--ds-size-20)); }
+.ds-navsection {
+  padding: 0 var(--ds-control-px-sm);
+  margin-top: var(--ds-space-4);
+  margin-bottom: var(--ds-space-1);
+  font-size: var(--ds-font-size-2xs);
+  font-weight: 500;
+  color: var(--ds-text-subtle);
+  text-transform: uppercase;
+  letter-spacing: var(--ds-letter-spacing-2xs);
+}
+
+/* ------------------------------------------------------- breadcrumb ---
+ * Reflects HIERARCHY, not history. The current page is present but not a link:
+ * linking a page to itself is a dead control.
+ */
+.ds-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  height: var(--ds-control-h-sm);
+  font-size: var(--ds-font-size-sm);
+}
+.ds-breadcrumb a, .ds-breadcrumb span {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+.ds-breadcrumb a { color: var(--ds-text-muted); text-decoration: none; }
+.ds-breadcrumb a:hover { color: var(--ds-text); text-decoration: underline; }
+.ds-breadcrumb [aria-current] { color: var(--ds-text); font-weight: 500; }
+/* The chevron is the system's separator glyph -- never "/" or "|". */
+.ds-breadcrumb-sep {
+  display: inline-flex;
+  align-items: center;
+  color: var(--ds-text-subtle);
+}
+.ds-breadcrumb-sep > svg { width: var(--ds-icon-sm); height: var(--ds-icon-sm); }
+
+/* ------------------------------------------------------- pagination ---
+ * Current page is `ink` -- a committed state, consistent with the primary
+ * button and checked controls. Prev/next are DISABLED at the bounds, never
+ * hidden: controls that vanish shift the row.
+ */
+.ds-pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+.ds-pagination-summary {
+  font-size: var(--ds-font-size-sm);
+  color: var(--ds-text-muted);
+}
+.ds-pagination-spacer { flex: 1; }
+.ds-pagination-list {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+}
+.ds-pagination-gap {
+  width: var(--ds-control-h-sm);
+  text-align: center;
+  color: var(--ds-text-subtle);
+  user-select: none;
+}
+
+/* ---------------------------------------------------------- stepper ---
+ * Complete and current are both `ink`; the difference is a check versus a
+ * numeral. Upcoming is `control` -- flat and quiet, so the eye lands on where
+ * you are.
+ */
+.ds-stepper {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+.ds-step {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+.ds-step-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-size-28);
+  height: var(--ds-size-28);
+  flex: none;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-control);
+  color: var(--ds-text-muted);
+  font-size: var(--ds-font-size-2xs);
+  font-weight: 500;
+}
+.ds-step-marker > svg { width: var(--ds-icon-sm); height: var(--ds-icon-sm); }
+.ds-step[data-state="complete"] .ds-step-marker,
+.ds-step[data-state="current"] .ds-step-marker {
+  background: var(--ds-ink);
+  color: var(--ds-on-ink);
+}
+.ds-step-label { font-size: var(--ds-font-size-sm); color: var(--ds-text-muted); }
+.ds-step[data-state="current"] .ds-step-label {
+  color: var(--ds-text);
+  font-weight: 500;
+}
+.ds-step-connector {
+  height: var(--ds-size-2);
+  min-width: var(--ds-space-6);
+  flex: 1;
+  background: var(--ds-border);
+}
+.ds-step-connector[data-state="complete"] { background: var(--ds-ink); }
+
+/* ================================================================ */
+/* FORM                                                              */
+/* ================================================================ */
+
+/* ----------------------------------------------------- search field --- */
+.ds-search { position: relative; display: block; }
+.ds-search > svg {
+  position: absolute;
+  left: var(--ds-control-px-sm);
+  top: 50%;
+  transform: translateY(-50%);
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
+  color: var(--ds-text-subtle);
+  pointer-events: none;
+}
+.ds-search > .ds-input {
+  padding-left: calc(var(--ds-control-px-sm) + var(--ds-icon-sm) + var(--ds-space-2));
+}
+.ds-search--pill > .ds-input { border-radius: var(--ds-radius-full); }
+
+/* ----------------------------------------------------- number input ---
+ * Right-aligned tabular figures so a column of numeric fields lines up -- the
+ * same rule as a numeric table column. `type="text"` with `inputmode`, because
+ * `type="number"` scrolls its value on wheel events over the field.
+ */
+.ds-number {
+  text-align: right;
+  /* room for the steppers, measured from their own width + the field padding */
+  padding-right: calc(var(--ds-size-24) + var(--ds-control-px-sm) * 2);
+  font-family: var(--ds-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.ds-number-group { position: relative; display: block; }
+.ds-number-steppers {
+  position: absolute;
+  /* Inset by the field's own horizontal padding, so the steppers sit on the
+   * same optical margin as the value. `right: 0` glued them to the edge. */
+  right: var(--ds-control-px-sm);
+  top: var(--ds-border-width);
+  bottom: var(--ds-border-width);
+  width: var(--ds-size-24);
+  display: flex;
+  flex-direction: column;
+}
+.ds-number-steppers > button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--ds-text-muted);
+  cursor: pointer;
+  padding: 0;
+}
+
+/* ----------------------------------------------------------- slider ---
+ * Filled track is `ink` -- committed, like every other filled state. The thumb
+ * keeps a `border-strong` edge because a `surface` circle on a `control` track
+ * would otherwise vanish: one of the few places a control border survives.
+ */
+.ds-slider {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  height: var(--ds-touch-target);
+}
+.ds-slider-track {
+  position: relative;
+  flex: 1;
+  height: var(--ds-size-4);
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-control);
+}
+.ds-slider-fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-ink);
+}
+.ds-slider-thumb {
+  position: absolute;
+  top: 50%;
+  width: var(--ds-size-20);
+  height: var(--ds-size-20);
+  margin-top: calc(var(--ds-size-20) / -2);
+  margin-left: calc(var(--ds-size-20) / -2);
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-surface);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  box-sizing: border-box;
+}
+.ds-slider-value {
+  min-width: var(--ds-size-48);
+  text-align: right;
+  font-size: var(--ds-font-size-sm);
+  font-family: var(--ds-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------ file upload ---
+ * The dashed border is the ONE sanctioned dashed line in the system: it means
+ * "not yet filled" and appears nowhere else. A drop zone must also be a button,
+ * because keyboard and screen-reader users cannot drag.
+ */
+.ds-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  min-height: var(--ds-size-120);
+  padding: var(--ds-space-4);
+  border: var(--ds-border-width) dashed var(--ds-border-strong);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-control);
+  cursor: pointer;
+  text-align: center;
+}
+.ds-dropzone > svg {
+  width: var(--ds-icon-lg);
+  height: var(--ds-icon-lg);
+  color: var(--ds-text-subtle);
+}
+.ds-dropzone[data-dragover] {
+  background: var(--ds-accent-subtle);
+  border-color: var(--ds-accent-border);
+}
+.ds-dropzone-title { font-size: var(--ds-font-size-sm); font-weight: 500; }
+.ds-dropzone-hint { font-size: var(--ds-font-size-2xs); color: var(--ds-text-muted); }
+/* The rows need an owning container: dropped into a card with `padding: 0`,
+ * their square corners overflowed the card's radius and the last row's border
+ * sat on the rounded edge. */
+.ds-filelist {
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface);
+  overflow: hidden;
+}
+.ds-filerow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  min-height: var(--ds-control-h-md);
+  /* bottom padding reserves the progress bar's track, so it never sits on the
+   * filename */
+  padding: var(--ds-space-2) var(--ds-space-3)
+           calc(var(--ds-space-2) + var(--ds-size-4));
+  background: var(--ds-surface);
+  border-bottom: var(--ds-border-width) solid var(--ds-border-subtle);
+  font-size: var(--ds-font-size-sm);
+}
+.ds-filerow:last-child { border-bottom: none; }
+.ds-filerow-thumb {
+  width: var(--ds-size-32);
+  height: var(--ds-size-32);
+  flex: none;
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-control);
+}
+.ds-filerow-spacer { flex: 1; }
+.ds-filerow-error { color: var(--ds-danger-text); }
+/* Per-file progress, full-bleed at the bottom of the row -- never one
+   aggregate bar for the whole upload. */
+.ds-filerow-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--ds-size-4);
+  background: var(--ds-control);
+}
+.ds-filerow-progress > * { display: block; height: 100%; background: var(--ds-ink); }
+
+/* -------------------------------------------------------- tag input ---
+ * Grows vertically as chips wrap; never scrolls horizontally, which would hide
+ * its own contents.
+ */
+.ds-taginput {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ds-space-1);
+  min-height: var(--ds-control-h-md);
+  max-height: var(--ds-size-120);
+  overflow-y: auto;
+  padding: var(--ds-space-1);
+  border: var(--ds-border-width) solid transparent;
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-control);
+}
+.ds-taginput > input {
+  flex: 1;
+  min-width: var(--ds-size-80);
+  border: none;
+  background: transparent;
+  color: var(--ds-text);
+  font: 400 var(--ds-font-size-sm)/1 var(--ds-font-text);
+  outline: none;
+}
+
+/* -------------------------------------------------------- combobox ---
+ * Matches are highlighted with WEIGHT, never a background tint: a highlight
+ * background collides with the `accent-subtle` selected state.
+ */
+.ds-combobox { position: relative; display: block; }
+/* The element carrying the radius must not be the element that scrolls: a
+ * scrollbar is painted inside the padding box and its square corner clips
+ * straight through the rounded edge. So the radius and `overflow: hidden` live
+ * on the container, and scrolling happens on an inner element. */
+.ds-listbox {
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-raised);
+  box-shadow: var(--ds-shadow-sm);
+  overflow: hidden;
+}
+.ds-listbox-items {
+  max-height: var(--ds-size-120);
+  overflow-y: auto;
+  padding: var(--ds-space-1);
+}
+.ds-option {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: var(--ds-control-h-sm);
+  padding: 0 var(--ds-control-px-sm);
+  border-radius: var(--ds-radius-sm);
+  font-size: var(--ds-font-size-sm);
+  cursor: pointer;
+}
+/* A raised surface, so hover is `control-subtle` -- `surface-hover` equals
+   `surface-raised` in dark mode and would show nothing. */
+.ds-option:hover, .ds-option[data-active] { background: var(--ds-control-subtle); }
+.ds-option[aria-selected="true"] {
+  background: var(--ds-accent-subtle);
+  color: var(--ds-accent-text);
+}
+.ds-option mark {
+  background: none;
+  color: inherit;
+  font-weight: 600;
+}
+.ds-option-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ds-control-h-md);
+  color: var(--ds-text-muted);
+  font-size: var(--ds-font-size-sm);
+}
+
+/* ----------------------------------------------------- date picker ---
+ * Selected is `ink` (a commitment); today is an `accent` dot (a landmark).
+ * Using the accent for both makes the calendar unreadable at a glance.
+ * Range interiors are square so a run of days reads as one continuous bar.
+ */
+.ds-calendar {
+  padding: var(--ds-space-3);
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-raised);
+  box-shadow: var(--ds-shadow-sm);
+}
+.ds-calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-2);
+  margin-bottom: var(--ds-space-2);
+  font-size: var(--ds-font-size-sm);
+  font-weight: 600;
+}
+.ds-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, var(--ds-size-36));
+  gap: 0;
+}
+.ds-calendar-weekday {
+  height: var(--ds-size-28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ds-font-size-2xs);
+  font-weight: 500;
+  color: var(--ds-text-muted);
+}
+.ds-day {
+  position: relative;
+  width: var(--ds-size-36);
+  height: var(--ds-size-36);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--ds-radius-sm);
+  background: transparent;
+  color: var(--ds-text);
+  font-size: var(--ds-font-size-sm);
+  cursor: pointer;
+}
+.ds-day:hover { background: var(--ds-control-subtle); }
+.ds-day[data-outside] { color: var(--ds-text-subtle); }
+
+/* ORDER MATTERS HERE, and getting it wrong is a real contrast failure.
+ *
+ * `[aria-selected="true"]` and `[data-range-start]` have identical specificity,
+ * so whichever comes last wins on `background`. With the range rules last, a
+ * selected endpoint kept `color: on-ink` from the selected rule while taking
+ * `background: accent-subtle` from the range rule -- white text on a pale tint,
+ * 1.10:1.
+ *
+ * So: range tints first (they describe UNSELECTED days inside a range), then
+ * selection (which must win on both fill and text), then radius-only overrides
+ * for the endpoints.
+ */
+.ds-day[data-range-inner] {
+  background: var(--ds-accent-subtle);
+  border-radius: 0;
+}
+.ds-day[data-range-start] {
+  background: var(--ds-accent-subtle);
+  border-radius: var(--ds-radius-sm) 0 0 var(--ds-radius-sm);
+}
+.ds-day[data-range-end] {
+  background: var(--ds-accent-subtle);
+  border-radius: 0 var(--ds-radius-sm) var(--ds-radius-sm) 0;
+}
+/* Selection wins on fill AND text, whatever range state the day also carries. */
+.ds-day[aria-selected="true"] {
+  background: var(--ds-ink);
+  color: var(--ds-on-ink);
+}
+.ds-day[aria-selected="true"][data-range-start] {
+  background: var(--ds-ink);
+  color: var(--ds-on-ink);
+  border-radius: var(--ds-radius-sm) 0 0 var(--ds-radius-sm);
+}
+.ds-day[aria-selected="true"][data-range-end] {
+  background: var(--ds-ink);
+  color: var(--ds-on-ink);
+  border-radius: 0 var(--ds-radius-sm) var(--ds-radius-sm) 0;
+}
+.ds-day[data-today]::after {
+  content: "";
+  position: absolute;
+  bottom: var(--ds-size-4);
+  width: var(--ds-size-4);
+  height: var(--ds-size-4);
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-accent);
+}
+.ds-day[aria-selected="true"][data-today]::after { background: var(--ds-on-ink); }
+
+/* -------------------------------------------------- command palette ---
+ * Keyboard highlight and pointer hover are the SAME visual state and only one
+ * is active at a time. Two highlighted rows at once is this component's
+ * defining failure.
+ */
+.ds-palette {
+  width: var(--ds-container-modal-md);
+  max-width: 100%;
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-surface-raised);
+  box-shadow: var(--ds-shadow-md);
+  overflow: hidden;
+}
+.ds-palette-search {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  height: var(--ds-size-56);
+  padding: 0 var(--ds-space-4);
+  border-bottom: var(--ds-border-width) solid var(--ds-border-subtle);
+}
+.ds-palette-search > input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--ds-text);
+  font: 400 var(--ds-font-size-base)/1 var(--ds-font-text);
+  outline: none;
+}
+.ds-palette-results {
+  max-height: var(--ds-size-120);
+  overflow-y: auto;
+  padding: 0 var(--ds-space-1) var(--ds-space-1);
+}
+.ds-palette-group {
+  padding: var(--ds-space-3) var(--ds-space-4) var(--ds-space-1);
+  font-size: var(--ds-font-size-2xs);
+  font-weight: 500;
+  color: var(--ds-text-subtle);
+  position: sticky;
+  top: 0;
+  background: var(--ds-surface-raised);
+}
+.ds-palette-group:first-child { padding-top: var(--ds-space-2); }
+.ds-palette-item {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  height: var(--ds-control-h-md);
+  padding: 0 var(--ds-space-4);
+  border-radius: var(--ds-radius-sm);
+  font-size: var(--ds-font-size-sm);
+  cursor: pointer;
+}
+.ds-palette-item[data-active] { background: var(--ds-control-subtle); }
+.ds-palette-item > svg { width: var(--ds-icon-sm); height: var(--ds-icon-sm); flex: none; }
+.ds-palette-shortcut {
+  margin-left: auto;
+  font-family: var(--ds-font-mono);
+  font-size: var(--ds-font-size-2xs);
+  color: var(--ds-text-subtle);
+}
+
+/* ================================================================ */
+/* DATA & FEEDBACK                                                   */
+/* ================================================================ */
+
+/* ------------------------------------------------------------ tree ---
+ * Indents by exactly one icon column per level so labels align with their
+ * parent's LABEL. No guide lines: indentation carries the hierarchy, and
+ * vertical rules at every level turn a tree into a grid.
+ */
+.ds-tree { list-style: none; margin: 0; padding: 0; }
+.ds-treerow {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  height: var(--ds-control-h-sm);
+  padding: 0 var(--ds-space-2);
+  border-radius: var(--ds-radius-sm);
+  font-size: var(--ds-font-size-sm);
+  cursor: pointer;
+}
+.ds-treerow:hover { background: var(--ds-control-subtle); }
+.ds-treerow[aria-selected="true"] {
+  background: var(--ds-accent-subtle);
+  color: var(--ds-accent-text);
+}
+/* The twisty is a SEPARATE target from the label: expanding a node must not
+   also select it. */
+.ds-twisty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-size-24);
+  height: var(--ds-size-24);
+  flex: none;
+  border: none;
+  background: none;
+  color: var(--ds-text-subtle);
+  cursor: pointer;
+  padding: 0;
+}
+.ds-twisty > svg {
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
+  transition: transform var(--ds-duration-fast) var(--ds-ease-standard);
+}
+.ds-twisty[aria-expanded="true"] > svg { transform: rotate(90deg); }
+.ds-tree .ds-tree { padding-left: var(--ds-size-20); }
+
+/* ------------------------------------------- description list ---------
+ * The label column is a FIXED width, not content-derived: labels of varying
+ * length make values start at ragged positions, and the eye cannot scan a
+ * column that does not exist.
+ */
+.ds-dl {
+  display: grid;
+  grid-template-columns: var(--ds-container-field-label) 1fr;
+  gap: var(--ds-space-3) var(--ds-space-4);
+  margin: 0;
+  font-size: var(--ds-font-size-sm);
+}
+.ds-dl > dt { margin: 0; color: var(--ds-text-muted); }
+.ds-dl > dd { margin: 0; color: var(--ds-text); overflow-wrap: anywhere; }
+.ds-dl > dd.ds-num { text-align: left; }
+/* An empty value is an em dash, never blank space: blank reads as broken. */
+.ds-dl-empty { color: var(--ds-text-subtle); }
+
+/* -------------------------------------------------------- timeline ---
+ * The connector stops at the last node -- a line trailing past the final entry
+ * implies content that is not there.
+ */
+.ds-timeline {
+  position: relative;
+  padding-left: var(--ds-size-24);
+  list-style: none;
+  margin: 0;
+}
+.ds-timeline::before {
+  content: "";
+  position: absolute;
+  left: var(--ds-size-4);
+  top: var(--ds-space-4);
+  bottom: var(--ds-space-4);
+  width: var(--ds-border-width);
+  background: var(--ds-border);
+}
+.ds-event {
+  position: relative;
+  padding: var(--ds-space-3) 0;
+  font-size: var(--ds-font-size-sm);
+}
+.ds-event::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--ds-size-24) * -1 + var(--ds-size-2));
+  top: var(--ds-space-4);
+  width: var(--ds-size-8);
+  height: var(--ds-size-8);
+  box-sizing: border-box;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-surface);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+}
+.ds-event[data-current]::before {
+  background: var(--ds-ink);
+  border-color: var(--ds-ink);
+}
+.ds-event-time {
+  font-size: var(--ds-font-size-2xs);
+  color: var(--ds-text-subtle);
+}
+/* A payload goes in a block beneath, never inline in the event sentence. */
+.ds-event-detail {
+  margin-top: var(--ds-space-2);
+  padding: var(--ds-space-2);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-control);
+  color: var(--ds-text-muted);
+}
+.ds-timeline-day {
+  position: sticky;
+  top: 0;
+  padding: var(--ds-space-2) 0;
+  font-size: var(--ds-font-size-2xs);
+  font-weight: 500;
+  color: var(--ds-text-subtle);
+  background: var(--ds-bg);
+}
+
+/* ------------------------------------------------------------ stat ---
+ * Tabular mono so digits align down a row of stats. A delta needs a comparison
+ * caption to mean anything: "+12%" alone is not information.
+ */
+.ds-stat-label { font-size: var(--ds-font-size-sm); color: var(--ds-text-muted); }
+.ds-stat-value {
+  margin-top: var(--ds-space-1);
+  font-size: var(--ds-font-size-2xl);
+  font-weight: 600;
+  font-family: var(--ds-font-mono);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--ds-line-height-2xl);
+}
+.ds-stat-delta {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  margin-top: var(--ds-space-1);
+  font-size: var(--ds-font-size-sm);
+  font-weight: 500;
+  color: var(--ds-text-muted);
+}
+.ds-stat-delta > svg { width: var(--ds-icon-sm); height: var(--ds-icon-sm); flex: none; }
+/* `good` / `bad`, NOT `up` / `down`. Colour follows the interpretation: falling
+   churn is good, rising latency is bad. Green-up is not universal. */
+.ds-stat-delta--good { color: var(--ds-success-text); }
+.ds-stat-delta--bad { color: var(--ds-danger-text); }
+.ds-stat-caption {
+  margin-top: var(--ds-size-2);
+  font-size: var(--ds-font-size-2xs);
+  color: var(--ds-text-subtle);
+}
+.ds-sparkline { height: var(--ds-size-40); color: var(--ds-accent); }
+
+/* ------------------------------------------------------ data table ---
+ * The bulk bar REPLACES the toolbar in place; a bar that pushes the table down
+ * moves the rows the user just selected out from under the pointer.
+ */
+.ds-table-toolbar, .ds-bulkbar {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+  height: var(--ds-control-h-lg);
+  margin-bottom: var(--ds-space-3);
+}
+.ds-bulkbar {
+  gap: var(--ds-space-2);
+  padding: 0 var(--ds-space-3);
+  background: var(--ds-surface-raised);
+  border: none;
+  border-radius: var(--ds-radius-md);
+  font-weight: 500;
+}
+.ds-bulkbar-sub { color: var(--ds-text-muted); font-weight: 400; }
+.ds-bulkbar-spacer, .ds-table-toolbar-spacer { flex: 1; }
+.ds-table-select { width: var(--ds-touch-target); }
+.ds-table-actions { width: var(--ds-touch-target); text-align: right; }
+.ds-table th[aria-sort] { color: var(--ds-text); }
+/* A selected row that is also hovered stays distinguishable. */
+.ds-table tr[aria-selected="true"]:hover { background: var(--ds-accent-muted); }
+
+/* --------------------------------------------------------- spinner ---
+ * Inherits `currentColor`, so it works inside an ink button, a ghost button and
+ * on any surface with no per-context variant.
+ */
+.ds-spinner {
+  width: var(--ds-icon-md);
+  height: var(--ds-icon-md);
+  flex: none;
+  color: currentColor;
+  animation: ds-spin var(--ds-duration-spin) linear infinite;
+}
+.ds-spinner--sm { width: var(--ds-icon-sm); height: var(--ds-icon-sm); }
+.ds-spinner--lg { width: var(--ds-icon-lg); height: var(--ds-icon-lg); }
+@keyframes ds-spin { to { transform: rotate(360deg); } }
+
+/* ----------------------------------------------------------- drawer ---
+ * Flush to the viewport edge, so it takes NO radius on that side. A rounded
+ * corner against a screen edge is the clearest sign a component was designed
+ * in isolation.
+ */
+.ds-drawer {
+  width: var(--ds-container-drawer-md);
+  max-width: 100%;
+  height: 100%;
+  padding: var(--ds-space-6);
+  background: var(--ds-surface-raised);
+  border-left: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-none);
+  box-shadow: var(--ds-shadow-md);
+  z-index: var(--ds-z-modal);
+}
+.ds-drawer--sm { width: var(--ds-container-drawer-sm); }
+.ds-drawer--lg { width: var(--ds-container-drawer-lg); }
+.ds-drawer--bottom {
+  width: 100%;
+  height: auto;
+  max-height: 90vh;
+  border-left: none;
+  border-top: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-lg) var(--ds-radius-lg) 0 0;
+}
+.ds-drawer-handle {
+  width: var(--ds-size-32);
+  height: var(--ds-size-4);
+  margin: 0 auto var(--ds-space-4);
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-control);
+}
+.ds-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ds-space-3);
+  height: var(--ds-control-h-lg);
+  margin-bottom: var(--ds-space-4);
+}
+
+/* ------------------------------------------------------- page structure --- */
+.ds-page-title {
+  margin: 0;
+  font-family: var(--ds-font-display);
+  font-size: var(--ds-font-size-2xl);
+  font-weight: 600;
+  letter-spacing: var(--ds-letter-spacing-display);
+}
+.ds-page-desc {
+  max-width: var(--ds-measure-base);
+  margin: var(--ds-space-2) 0 0;
+  font-size: var(--ds-font-size-base);
+  color: var(--ds-text-muted);
+}
+/* No bottom border: section-gap already separates the header from content. */
+.ds-page-header { margin-bottom: var(--ds-section-gap); border-bottom: none; }

@@ -45,21 +45,19 @@ export function FilePickerDialog({
       wide
       onClose={onDismiss}
       title={
-        <span title={torrent.name} style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>
-          Choose files — {torrent.name}
-        </span>
+        <span title={torrent.name}>Choose files — {torrent.name}</span>
       }
       footer={
         <>
-          <span className="hint" style={{ margin: 0 }} aria-live="polite">
+          <span className="ds-help" aria-live="polite">
             {chosen.length} of {torrent.files.length} files · {formatBytes(totalSize)}
           </span>
           <div className="right">
-            <button className="danger" onClick={onDiscard}>
+            <button className="ds-btn ds-btn--outline ds-btn--destructive" onClick={onDiscard}>
               Discard torrent
             </button>
             <button
-              className="primary"
+              className="ds-btn ds-btn--filled ds-btn--neutral"
               disabled={chosen.length === 0}
               onClick={() => onConfirm([...selected])}
             >
@@ -70,14 +68,17 @@ export function FilePickerDialog({
       }
     >
       <div className="modal-body">
-        <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+        <div className="picker-actions">
           <button
-            className="icon-btn"
+            className="ds-btn ds-btn--s ds-btn--ghost ds-btn--neutral"
             onClick={() => setSelected(new Set(torrent.files.map((f) => f.index)))}
           >
             Select all
           </button>
-          <button className="icon-btn" onClick={() => setSelected(new Set())}>
+          <button
+            className="ds-btn ds-btn--s ds-btn--ghost ds-btn--neutral"
+            onClick={() => setSelected(new Set())}
+          >
             Select none
           </button>
         </div>

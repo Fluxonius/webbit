@@ -9,9 +9,7 @@ export function Player({ infoHash, file }: { infoHash: string; file: FileInfo })
 
   return (
     <div className="player">
-      {file.mime.startsWith('video/') && (
-        <video src={url} controls autoPlay />
-      )}
+      {file.mime.startsWith('video/') && <video src={url} controls autoPlay />}
       {file.mime.startsWith('audio/') && <audio src={url} controls autoPlay />}
       {file.mime.startsWith('image/') && <img src={url} alt={file.name} />}
       {file.mime === 'application/pdf' && <iframe src={url} title={file.name} />}

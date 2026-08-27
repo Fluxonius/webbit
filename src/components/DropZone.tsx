@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { DownloadSimpleIcon } from '@phosphor-icons/react'
 
 // Whole-window drag/drop. A drop consisting entirely of .torrent files is
 // treated as "add torrent"; anything else is treated as "seed these files".
@@ -48,5 +49,15 @@ export function DropZone({
   }, [onTorrents, onSeed])
 
   if (!dragging) return null
-  return <div className="drag-overlay">Drop .torrent files to add · other files to seed</div>
+  return (
+    <div className="drag-overlay">
+      <div className="ds-dropzone" data-dragover>
+        <DownloadSimpleIcon aria-hidden="true" />
+        <span className="ds-dropzone-title">Drop to add</span>
+        <span className="ds-dropzone-hint">
+          .torrent files are added as torrents · anything else is seeded
+        </span>
+      </div>
+    </div>
+  )
 }

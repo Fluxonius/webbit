@@ -4,3 +4,6 @@ downloads
 .webbit
 *.log
 .DS_Store
+
+# Generated proof sheet — regenerate with build_preview.py
+preview.html

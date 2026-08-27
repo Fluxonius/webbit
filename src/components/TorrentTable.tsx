@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { CaretDownIcon, CaretUpIcon } from '@phosphor-icons/react'
 import type { TorrentSnapshot } from '../../shared/types.ts'
 import { formatBytes, formatEta, formatPercent, formatRatio, formatSpeed } from '../format.ts'
 
@@ -38,27 +39,37 @@ const COLUMNS: Column[] = [
 ]
 
 function ProgressBar({ t }: { t: TorrentSnapshot }) {
-  const cls =
-    t.status === 'seeding' || t.status === 'done'
-      ? 'pbar done'
-      : t.status === 'paused'
-        ? 'pbar paused'
-        : 'pbar'
   const pct = Math.round(t.progress * 100)
   return (
-    <div
-      className={cls}
-      role="progressbar"
-      aria-valuenow={pct}
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuetext={`${formatPercent(t.progress)}, ${t.status}`}
-    >
-      <span style={{ width: `${pct}%` }} />
-      {/* The percentage is already in aria-valuetext; don't read it twice. */}
-      <em aria-hidden="true">{formatPercent(t.progress)}</em>
+    <div className="progress-cell">
+      <div
+        className="ds-progress"
+        role="progressbar"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuetext={`${formatPercent(t.progress)}, ${t.status}`}
+      >
+        <span style={{ width: `${pct}%` }} />
+      </div>
+      {/* Already in aria-valuetext above; don't let it be read twice. */}
+      <span className="pct" aria-hidden="true">
+        {formatPercent(t.progress)}
+      </span>
     </div>
   )
+}
+
+/* Status is a label, so it is a Badge, not a Chip. The word is always present:
+   the tint is a second signal, never the only one. */
+const STATUS_TONE: Record<string, string> = {
+  downloading: 'ds-badge--info',
+  seeding: 'ds-badge--success',
+  done: 'ds-badge--success',
+  connecting: 'ds-badge--warning',
+  choosing: 'ds-badge--warning',
+  error: 'ds-badge--danger',
+  paused: '',
 }
 
 export function TorrentTable({
@@ -136,8 +147,11 @@ export function TorrentTable({
     rowRefs.current[next]?.focus()
   }
 
+  // A real grid, not a static table: the rows carry a roving tabindex and
+  // respond to the arrow keys, and `aria-selected` on a row is only legal
+  // inside one.
   return (
-    <table className="torrents" aria-label="Torrents">
+    <table className="ds-table torrents" role="grid" aria-label="Torrents">
       <colgroup>
         {COLUMNS.map((c) => (
           <col key={c.key} style={c.width ? { width: c.width } : undefined} />
@@ -148,7 +162,7 @@ export function TorrentTable({
           {COLUMNS.map((c) => (
             <th
               key={c.key}
-              className={sortKey === c.key ? 'sorted' : ''}
+              className={c.num ? 'ds-num' : undefined}
               // Announced by screen readers as the column's current sort state.
               aria-sort={sortKey === c.key ? (asc ? 'ascending' : 'descending') : 'none'}
             >
@@ -159,7 +173,7 @@ export function TorrentTable({
               >
                 {c.label}
                 <span className="sort-arrow" aria-hidden="true">
-                  {sortKey === c.key ? (asc ? '▲' : '▼') : ''}
+                  {sortKey === c.key ? asc ? <CaretUpIcon /> : <CaretDownIcon /> : null}
                 </span>
               </button>
             </th>
@@ -173,9 +187,8 @@ export function TorrentTable({
             ref={(el) => {
               rowRefs.current[i] = el
             }}
-            className={selected === t.infoHash ? 'selected' : ''}
             tabIndex={i === activeIndex ? 0 : -1}
-            aria-current={selected === t.infoHash ? true : undefined}
+            aria-selected={selected === t.infoHash}
             onClick={() => onSelect(t.infoHash)}
             onKeyDown={(e) => onRowKeyDown(e, i)}
           >
@@ -184,19 +197,19 @@ export function TorrentTable({
                 {t.name}
               </div>
             </td>
-            <td className="num">{formatBytes(t.length)}</td>
-            <td className="num">
+            <td className="ds-num">{formatBytes(t.length)}</td>
+            <td>
               <ProgressBar t={t} />
             </td>
-            <td className="num">{formatSpeed(t.downloadSpeed)}</td>
-            <td className="num">{formatSpeed(t.uploadSpeed)}</td>
-            <td className="num">{t.numPeers}</td>
-            <td className="num" title={formatEta(t.timeRemaining, t.status).hint}>
+            <td className="ds-num">{formatSpeed(t.downloadSpeed)}</td>
+            <td className="ds-num">{formatSpeed(t.uploadSpeed)}</td>
+            <td className="ds-num">{t.numPeers}</td>
+            <td className="ds-num" title={formatEta(t.timeRemaining, t.status).hint}>
               {formatEta(t.timeRemaining, t.status).text}
             </td>
-            <td className="num">{formatRatio(t.ratio)}</td>
+            <td className="ds-num">{formatRatio(t.ratio)}</td>
             <td>
-              <span className={`pill ${t.status}`}>{t.status}</span>
+              <span className={`ds-badge ${STATUS_TONE[t.status] ?? ''}`}>{t.status}</span>
             </td>
           </tr>
         ))}
