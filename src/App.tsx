@@ -13,6 +13,7 @@ import { AddTorrentDialog } from './components/AddTorrentDialog.tsx'
 import { FilePickerDialog } from './components/FilePickerDialog.tsx'
 import { Modal } from './components/Modal.tsx'
 import { ToastList } from './components/ToastList.tsx'
+import { Logo } from './components/Logo.tsx'
 
 export function App() {
   const { torrents, stats, connected } = useTorrents()
@@ -99,14 +100,9 @@ export function App() {
     <div className="app">
       <header className="ds-appbar topbar">
         <span className="ds-appbar-brand">
-          {/* Live connection to the engine. The tooltip carries the state in
-              words — the dot's colour is never the only signal. */}
-          <span
-            className={`brand-dot${connected ? '' : ' off'}`}
-            role="img"
-            aria-label={connected ? 'Connected to engine' : 'Disconnected from engine'}
-            title={connected ? 'Connected to engine' : 'Disconnected from engine'}
-          />
+          {/* The mark's accent cell is the engine's connection lamp, so there
+              is no separate status dot. Its <title> states the state in words. */}
+          <Logo connected={connected} />
           webbit
         </span>
         <Toolbar

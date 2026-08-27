@@ -58,15 +58,12 @@ table.torrents tbody tr {
   flex: none;
 }
 
-.brand-dot {
-  width: var(--ds-size-8);
-  height: var(--ds-size-8);
-  flex: none;
-  border-radius: var(--ds-radius-full);
-  background: var(--ds-success-solid);
+/* The mark sits tight to the wordmark — they read as one lockup. */
+.ds-appbar-brand {
+  gap: var(--ds-space-2);
 }
-.brand-dot.off {
-  background: var(--ds-danger-solid);
+.ds-appbar-brand > svg {
+  flex: none;
 }
 
 .toolbar {
